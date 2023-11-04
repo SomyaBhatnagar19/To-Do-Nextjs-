@@ -1,6 +1,14 @@
+"use client"
 import { BiSearch, BiCircle, BiTrash, BiPlus, BiCheck } from "react-icons/bi";
-
+import Link from "next/link";
+import AddTasks from './addTasks/page';
+import { useState } from "react";
 export default function Home() {
+  const [ AddClicked, setAddClicked ] = useState(false);
+
+  const addHandler = () => {
+    setAddClicked(true);
+  }
   return (
     // background
     <div className="bg-zinc-400 min-h-screen">
@@ -19,9 +27,11 @@ export default function Home() {
             <BiSearch className="absolute left-3 top-1 text-gray-900" />
           </div>
           <div className="flex items-center gap-2">
-            <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+            {/* <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" onClick={addHandler}>
               <BiPlus />
             </button>
+            {AddClicked && <AddTasks/>} */}
+            <AddTasks/>
             <button className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
               <BiTrash />
             </button>
