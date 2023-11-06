@@ -1,3 +1,5 @@
+//app/store/store.js
+'use client'
 import { configureStore } from "@reduxjs/toolkit";
 import todoSliceReducer from "./Features/slices/dataStore";
 

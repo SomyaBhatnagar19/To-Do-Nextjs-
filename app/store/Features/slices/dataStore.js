@@ -1,3 +1,5 @@
+//app/store/slices/dataStore.js
+'use client'
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
@@ -40,6 +42,8 @@ export const {
     DeletedClicked,
     toggleDeleteIsClicked,
     toggleCompletedClicked,
+    markAsCompleted,
+    addNewTask,
 } = todoSlice.actions;
 
 export default todoSlice.reducer;

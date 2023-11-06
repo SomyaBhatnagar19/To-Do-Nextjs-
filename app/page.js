@@ -17,11 +17,11 @@ import {
 export default function Home() {
   const [AddClicked, setAddClicked] = useState(false);
 
-  const allTasks = useSelector((state) => state.allTasks);
-  const completedTasks = useSelector((state) => state.CompletedTasks);
-  const deletedTasks = useSelector((state) => state.DeletedTasks);
-  const isDeletedClicked = useSelector((state) => state.DeleteClicked);
-  const isCompletedClicked = useSelector((state) => state.CompletedClicked);
+  const allTasks = useSelector((state) => state.todoSlice.allTasks);
+  const completedTasks = useSelector((state) => state.todoSlice.CompletedTasks);
+  const deletedTasks = useSelector((state) => state.todoSlice.DeletedTasks);
+  const isDeletedClicked = useSelector((state) => state.todoSlice.DeleteClicked);
+  const isCompletedClicked = useSelector((state) => state.todoSlice.CompletedClicked);
 
   const dispatch = useDispatch();
 
