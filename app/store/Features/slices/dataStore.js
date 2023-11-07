@@ -3,7 +3,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-    allTasks :[],
+    allTasks :[{ id: 1, title: "Sample Task 1", description: "Description 1", date: "2023-11-07" },
+    { id: 2, title: "Sample Task 2", description: "Description 2", date: "2023-11-08" },],
     CompletedTasks : [],
     DeletedTasks :[],
     DeleteClicked : false,

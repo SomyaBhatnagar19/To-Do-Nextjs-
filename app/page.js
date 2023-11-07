@@ -18,12 +18,16 @@ import {
 
 export default function Home() {
   const [AddClicked, setAddClicked] = useState(false);
-
+  const allTasksData = useSelector((state) => state.todoSlice.allTasks);
   const allTasks = useSelector((state) => state.todoSlice.allTasks);
   const completedTasks = useSelector((state) => state.todoSlice.CompletedTasks);
   const deletedTasks = useSelector((state) => state.todoSlice.DeletedTasks);
-  const isDeletedClicked = useSelector((state) => state.todoSlice.DeleteClicked);
-  const isCompletedClicked = useSelector((state) => state.todoSlice.CompletedClicked);
+  const isDeletedClicked = useSelector(
+    (state) => state.todoSlice.DeleteClicked
+  );
+  const isCompletedClicked = useSelector(
+    (state) => state.todoSlice.CompletedClicked
+  );
 
   const dispatch = useDispatch();
 
@@ -62,32 +66,51 @@ export default function Home() {
             <button
               className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
               onClick={() => setAddClicked(true)}
-            > 
-            <BiPlus/>
+            >
+              {" "}
+              <BiPlus />
               {AddClicked && <AddTasks />}
             </button>
-            
+
             <button className="bg-red-500 text-white px-4 py-2 rounded hover-bg-red-600">
               <BiTrash />
             </button>
           </div>
         </div>
-        <div className="p-4">
-          <div className="bg-slate-800 p-2 text-white text-sm italic font-mono shadow-md flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <BiCircle />
-              Your to-dos
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="bg-purple-700 text-white text-bold px-3 py-2 rounded-lg hover:bg-purple-500" onClick={() => markTaskAsCompleted(task.id)}>
-                <BiCheck />
-              </div>
-              <div className="bg-pink-700 text-white text-bold px-3 py-2 rounded-lg hover:bg-pink-500">
-                <BiTrash />
-              </div>
-            </div>
+        <div className="p-4 ">
+  {allTasksData.map((task) => (
+    <div key={task.id} className="bg-slate-800 p-3 text-white shadow-md mb-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <BiCircle className="text-purple-500" />
+          <div className="flex flex-col">
+            <div className="text-md font-semibold italic">{task.title}</div>
+            {/* <div className="text-gray-500 text-right"> {new Date(task.date).toLocaleDateString("en-GB")}</div> */}
+            <div className="text-sm text-gray-400 italic">{task.description}</div>
           </div>
         </div>
+        <div className="flex items-center gap-4">
+        <div className="text-gray-300 text-sm text-right italic">
+        {new Date(task.date).toLocaleDateString("en-GB")}
+      </div>
+          <div
+            className="bg-purple-700 text-white text-bold px-4 py-2 rounded-lg hover:bg-purple-500 cursor-pointer"
+            onClick={() => markTaskAsCompleted(task.id)}
+          >
+            <BiCheck />
+          </div>
+          <div
+            className="bg-pink-700 text-white text-bold px-4 py-2 rounded-lg hover:bg-pink-500 cursor-pointer"
+          >
+            <BiTrash />
+          </div>
+        </div>
+      </div>
+    </div>
+  ))}
+</div>
+
+
       </div>
     </div>
   );
