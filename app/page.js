@@ -1,3 +1,5 @@
+//app/page.js
+
 "use client";
 
 import { BiSearch, BiCircle, BiTrash, BiCheck, BiPlus } from "react-icons/bi";
@@ -60,10 +62,11 @@ export default function Home() {
             <button
               className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
               onClick={() => setAddClicked(true)}
-            >
-              <BiPlus />
+            > 
+            <BiPlus/>
+              {AddClicked && <AddTasks />}
             </button>
-            {AddClicked && <AddTasks />}
+            
             <button className="bg-red-500 text-white px-4 py-2 rounded hover-bg-red-600">
               <BiTrash />
             </button>

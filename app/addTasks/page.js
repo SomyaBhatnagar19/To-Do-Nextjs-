@@ -1,3 +1,5 @@
+//app/addTasks/page.js
+
 "use client"
 
 import React, { useState } from "react";
@@ -19,7 +21,7 @@ const AddTasks = () => {
         onClick={openModal}
         className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
       >
-        <BiPlus/>
+        Click to add data
       </button>
 
       {isModalOpen && (
