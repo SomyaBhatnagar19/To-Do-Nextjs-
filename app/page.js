@@ -4,8 +4,13 @@
 
 import { BiSearch, BiCircle, BiTrash, BiCheck, BiPlus } from "react-icons/bi";
 import AddTasks from "./addTasks/page";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import {
+  fetchAllCompletedToDos,
+  fetchAllToDos,
+} from "./store/Features/slices/dataStore";
+
 import {
   allTasks,
   addNewTask,
@@ -17,27 +22,52 @@ import {
 } from "./store/Features/slices/dataStore";
 
 export default function Home() {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchAllToDos());
+  }, [dispatch]);
+
   const [AddClicked, setAddClicked] = useState(false);
   const allTasksData = useSelector((state) => state.todoSlice.allTasks);
-  const allTasks = useSelector((state) => state.todoSlice.allTasks);
   const completedTasks = useSelector((state) => state.todoSlice.CompletedTasks);
-  const deletedTasks = useSelector((state) => state.todoSlice.DeletedTasks);
-  const isDeletedClicked = useSelector(
-    (state) => state.todoSlice.DeleteClicked
-  );
   const isCompletedClicked = useSelector(
     (state) => state.todoSlice.CompletedClicked
   );
-
-  const dispatch = useDispatch();
 
   const addTask = (task) => {
     dispatch(addNewTask(task));
   };
 
-  const markTaskAsCompleted = (taskID) => {
-    dispatch(markAsCompleted(taskID));
+  const markTaskAsCompleted = async (taskID, taskTitle, taskDescription, taskDate) => {
+    const obj = {
+      title : taskTitle,
+      date : taskDate,
+      description : taskDescription,
+    }
+    try {
+      const response = await fetch(`http://localhost:3000/api/completedTasks`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(obj),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to mark task as completed");
+      }
+
+      alert("This task has been completed.");
+      dispatch(markAsCompleted(taskID));
+      dispatch(fetchAllCompletedToDos());
+    } catch (error) {
+      alert("Error!");
+      console.error(error);
+    }
   };
+
+
 
   const toggleDeleteClick = () => {
     dispatch(toggleDeleteIsClicked());
@@ -45,6 +75,16 @@ export default function Home() {
 
   const toggleCompletedClick = () => {
     dispatch(toggleCompletedClicked());
+  };
+
+  const showCompletedTasks = () => {
+    // Dispatch action to set CompletedClicked flag
+    dispatch(toggleCompletedClicked());
+  };
+
+  const deleteCompletedTask = (taskID) => {
+    // Implement logic to delete a completed task
+    // Dispatch action to delete the task from the store
   };
 
   return (
@@ -72,44 +112,88 @@ export default function Home() {
               {AddClicked && <AddTasks />}
             </button>
 
-            <button className="bg-red-500 text-white px-4 py-2 rounded hover-bg-red-600">
+            <button
+              className="bg-red-500 text-white px-4 py-2 rounded hover-bg-red-600"
+              onClick={() => toggleDeleteClick()}
+            >
               <BiTrash />
             </button>
           </div>
         </div>
-        <div className="p-4 ">
-  {allTasksData.map((task) => (
-    <div key={task.id} className="bg-slate-800 p-3 text-white shadow-md mb-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <BiCircle className="text-purple-500" />
-          <div className="flex flex-col">
-            <div className="text-md font-semibold italic">{task.title}</div>
-            {/* <div className="text-gray-500 text-right"> {new Date(task.date).toLocaleDateString("en-GB")}</div> */}
-            <div className="text-sm text-gray-400 italic">{task.description}</div>
-          </div>
-        </div>
-        <div className="flex items-center gap-4">
-        <div className="text-gray-300 text-sm text-right italic">
-        {new Date(task.date).toLocaleDateString("en-GB")}
-      </div>
-          <div
-            className="bg-purple-700 text-white text-bold px-4 py-2 rounded-lg hover:bg-purple-500 cursor-pointer"
-            onClick={() => markTaskAsCompleted(task.id)}
+        <div className="p-4">
+          {allTasksData.map((task) => (
+            <div
+              key={task.id}
+              className="bg-slate-800 p-3 text-white shadow-md mb-4"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <BiCircle className="text-purple-500" />
+                  <div className="flex flex-col">
+                    <div className="text-md font-semibold italic">
+                      {task.title}
+                    </div>
+                    <div className="text-sm text-gray-400 italic">
+                      {task.description}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-gray-300 text-sm text-right italic">
+                    {new Date(task.date).toLocaleDateString("en-GB")}
+                  </div>
+                  <div
+                    className="bg-purple-700 text-white text-bold px-4 py-2 rounded-lg hover:bg-purple-500 cursor-pointer"
+                    onClick={() => markTaskAsCompleted(task._id, task.title, task.decsription, task.date)}
+                  >
+                    <BiCheck />
+                  </div>
+                  <div className="bg-pink-700 text-white text-bold px-4 py-2 rounded-lg hover:bg-pink-500 cursor-pointer">
+                    <BiTrash />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+          <button
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            onClick={showCompletedTasks}
           >
-            <BiCheck />
-          </div>
-          <div
-            className="bg-pink-700 text-white text-bold px-4 py-2 rounded-lg hover:bg-pink-500 cursor-pointer"
-          >
-            <BiTrash />
-          </div>
+            Show Completed Tasks
+          </button>
         </div>
-      </div>
-    </div>
-  ))}
-</div>
 
+        {/* Add a section to display completed tasks */}
+        {isCompletedClicked && (
+  <div className="p-4">
+    {completedTasks.map((task) => (
+      <div
+        key={task.id}
+        className="bg-slate-800 p-3 text-white shadow-md mb-4"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <BiCircle className="text-purple-500" />
+            <div className="flex flex-col">
+              <div className="text-md font-semibold italic">
+                {task.title}
+              </div>
+              <div className="text-sm text-gray-400 italic">
+                {task.description}
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="text-gray-300 text-sm text-right italic">
+              {new Date(task.date).toLocaleDateString("en-GB")}
+            </div>
+            
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+)}
 
       </div>
     </div>

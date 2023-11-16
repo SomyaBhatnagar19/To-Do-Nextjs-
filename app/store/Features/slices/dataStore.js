@@ -1,6 +1,7 @@
 //app/store/slices/dataStore.js
 'use client'
 import { createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk } from "@reduxjs/toolkit";
 
 const initialState = {
     allTasks :[{ id: 1, title: "Sample Task 1", description: "Description 1", date: "2023-11-07" },
@@ -10,6 +11,36 @@ const initialState = {
     DeleteClicked : false,
     CompletedClicked : false,  
 }
+
+export const fetchAllToDos = createAsyncThunk("ToDo/fetchAllToDos", 
+async (_, thunkAPI) => {
+  try{
+    const response = await fetch("http://localhost:3000/api");
+    if(!response.ok) {
+      throw new Error("Failed to get Toos.");
+    }
+    const data = await response.json();
+    return data;
+  } catch(error) {
+    throw error;
+  }
+} 
+)
+
+export const fetchAllCompletedToDos = createAsyncThunk("ToDo/fetchAllCompletedToDos", 
+async (_, thunkAPI) => {
+  try{
+    const response = await fetch("http://localhost:3000/api/completedTasks");
+    if(!response.ok) {
+      throw new Error("Failed to get Toos.");
+    }
+    const data = await response.json();
+    return data;
+  } catch(error) {
+    throw error;
+  }
+} 
+)
 
 const todoSlice = createSlice({
     name: "todoSlice",
@@ -25,6 +56,7 @@ const todoSlice = createSlice({
               const completedTask = state.allTasks[taskIndex];
               state.CompletedTasks.push(completedTask);
             }
+           
           },
           toggleDeleteIsClicked: (state) => {
             state.DeleteClicked = !state.DeleteClicked;
@@ -32,6 +64,14 @@ const todoSlice = createSlice({
           toggleCompletedClicked: (state) => {
             state.CompletedClicked = !state.CompletedClicked;
           },
+    }, 
+    extraReducers: (builder) => {
+      builder.addCase(fetchAllToDos.fulfilled, (state, action) => {
+        state.allTasks = action.payload;
+      });
+      builder.addCase(fetchAllCompletedToDos.fulfilled, (state, action) => {
+        state.CompletedTasks = action.payload;
+      })
     }
 })
 
