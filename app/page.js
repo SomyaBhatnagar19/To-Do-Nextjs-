@@ -97,7 +97,7 @@ export default function Home() {
       const data = await response.json();
       console.log(data);
       alert("Task Deleted.");
-      // dispatch(toggleDeleteIsClicked());
+      dispatch(toggleDeleteIsClicked());
       alert('You have successfully deleted the task!');
     } catch (error) {
       console.log('Error occurred while deleting the task! ', error);
@@ -151,7 +151,6 @@ export default function Home() {
 
             <button
               className="bg-red-500 text-white px-4 py-2 rounded hover-bg-red-600"
-              onClick={() => handleDelete(task._id)}
             >
               <BiTrash />
             </button>
@@ -185,7 +184,9 @@ export default function Home() {
                   >
                     <BiCheck />
                   </div>
-                  <div className="bg-pink-700 text-white text-bold px-4 py-2 rounded-lg hover:bg-pink-500 cursor-pointer">
+                  <div className="bg-pink-700 text-white text-bold px-4 py-2 rounded-lg hover:bg-pink-500 cursor-pointer"
+                  onClick={() => handleDelete(task._id)}
+                  >
                     <BiTrash />
                   </div>
                 </div>
