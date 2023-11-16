@@ -3,15 +3,39 @@
 "use client"
 
 import { title } from "process";
-import React, { useState, useRef } from "react";
+import { useSelector } from "react-redux";
+import React, { useState, useRef, useEffect } from "react";
 import { BiArrowToLeft, BiPlus } from "react-icons/bi";
-
+import { toggleEditClickHandler, editTodo, editIsClicked } from "../store/Features/slices/dataStore";
 const AddTasks = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const titleRef = useRef(null);
   const descriptionRef = useRef(null);
   const dateRef = useRef(null);
+
+  const editIsClicked = useSelector((state) => state.todoSlice.editIsClicked);
+  const editedList = useSelector((state) => state.todoSlice.editedIncompleteTasks);
+    
+  let initialValues = { title: "", date: "", description: "" };
+
+  if (editIsClicked && editedList.length > 0) {
+    const obj = editedList[0];
+    initialValues = { title: obj.title, date: obj.date, description: obj.description };
+  }
+
+  const [values, setValues] = useState(initialValues);
+
+  useEffect(() => {
+    if (editIsClicked && titleRef.current && dateRef.current && descriptionRef.current) {
+      const obj = editedList[0];
+
+      titleRef.current.value = obj.title;
+      dateRef.current.value = obj.date;
+      descriptionRef.current.value = obj.description;
+    }
+  }, [editIsClicked, editedList]);
+  
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -22,39 +46,80 @@ const AddTasks = () => {
   };
 
   const clearFormField = () => {
-    titleRef.current.value = "";
-    descriptionRef.current.value = "";
-    dateRef.current.value = "";
+    setValues(initialValues); // Reset the form values
   }
 
-  const addToDoHandler = async(e) => {
+  const addToDoHandler = async (e) => {
     e.preventDefault();
-    const obj = {
-      title : titleRef.current.value,
-      description: descriptionRef.current.value,
-      date: dateRef.current.value,
-    };
-
-
-    try{
-      const response = await fetch("http://localhost:3000/api", 
-      {
-        method: "POST",
-        body: JSON.stringify(obj),
-        headers: {
-          "Content-Type" : "application/json"
+  
+    if (editIsClicked) {
+      const obj = editedList[0];
+      const id = obj._id;
+      const editedObj = {
+        title: titleRef.current.value,
+        date: dateRef.current.value,
+        description: descriptionRef.current.value,
+      };
+  
+      try {
+        const response = await fetch(`http://localhost:3000/api/${id}`, {
+          method: "PUT",
+          body: JSON.stringify(editedObj),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+  
+        if (!response.ok) {
+          throw new Error("Failed to update task");
         }
-      }) 
-      const data = await response.json();
-      console.log("DATA: ", data);
-      alert("Your toDo has been added successfully.");
-      clearFormField();
-
-    } catch(error) {
-      alert("Error! ToDo not added.");
-      console.log(error);
+  
+        const data = await response.json();
+  
+        alert("You have successfully edited your task!");
+  clearFormField();
+  
+        console.log(data);
+      } catch (error) {
+        alert(error.message);
+        console.error(error);
+      }
+    } else {
+      const obj = {
+        title: titleRef.current.value,
+        date: dateRef.current.value,
+        description: descriptionRef.current.value,
+      };
+  
+      try {
+        const response = await fetch('http://localhost:3000/api', {
+          method: 'POST',
+          body: JSON.stringify(obj),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+  
+        if (!response.ok) {
+          throw new Error("Failed to add task");
+        }
+  
+        const data = await response.json();
+        console.log(data);
+  
+        alert('You have successfully added your task!');
+  
+        titleRef.current.value = '';
+        dateRef.current.value = '';
+        descriptionRef.current.value = '';
+      } catch (error) {
+        alert(error.message);
+        console.error(error);
+      }
     }
-  }
+  };
+  
+
 
   return (
     <div>

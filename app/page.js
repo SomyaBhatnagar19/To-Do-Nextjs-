@@ -2,13 +2,21 @@
 
 "use client";
 
-import { BiSearch, BiCircle, BiTrash, BiCheck, BiPlus } from "react-icons/bi";
+import {
+  BiSearch,
+  BiCircle,
+  BiTrash,
+  BiCheck,
+  BiPlus,
+  BiEdit,
+} from "react-icons/bi";
 import AddTasks from "./addTasks/page";
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   fetchAllCompletedToDos,
   fetchAllToDos,
+  toggleModalIsClicked,modalIsClicked, editIsClicked,
 } from "./store/Features/slices/dataStore";
 
 import {
@@ -19,10 +27,13 @@ import {
   toggleCompletedClicked,
   CompletedTasks,
   DeletedTasks,
+  editTodo,
+  toggleEditClickHandler,
 } from "./store/Features/slices/dataStore";
 
 export default function Home() {
   const dispatch = useDispatch();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     dispatch(fetchAllToDos());
@@ -39,12 +50,17 @@ export default function Home() {
     dispatch(addNewTask(task));
   };
 
-  const markTaskAsCompleted = async (taskID, taskTitle, taskDescription, taskDate) => {
+  const markTaskAsCompleted = async (
+    taskID,
+    taskTitle,
+    taskDescription,
+    taskDate
+  ) => {
     const obj = {
-      title : taskTitle,
-      date : taskDate,
-      description : taskDescription,
-    }
+      title: taskTitle,
+      date: taskDate,
+      description: taskDescription,
+    };
     try {
       const response = await fetch(`http://localhost:3000/api/completedTasks`, {
         method: "POST",
@@ -69,17 +85,17 @@ export default function Home() {
     //making delete functionality when check button clicked the particular task clicked is deleted from total tasks
     try {
       const response = await fetch(`http://localhost:3000/api/${taskID}`, {
-        method : "DELETE",
-        headers : {
-          "Content-Type" : "application/json"
-        }
-      })
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
       const data = await response.json();
       console.log("Completed data deleted from the all task list: ", data);
 
       alert("You have deleted the task successfully.");
-    } catch(error) {
+    } catch (error) {
       console.log("Error! while deleteing the task. ", error);
       alert("Error! while deleteing the task. ");
     }
@@ -88,31 +104,41 @@ export default function Home() {
   const handleDelete = async (taskID) => {
     try {
       const response = await fetch(`http://localhost:3000/api/${taskID}`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
-  
+
       const data = await response.json();
       console.log(data);
       alert("Task Deleted.");
       dispatch(toggleDeleteIsClicked());
-      alert('You have successfully deleted the task!');
+      alert("You have successfully deleted the task!");
     } catch (error) {
-      console.log('Error occurred while deleting the task! ', error);
-      alert('Error occurred while deleting the task!');
+      console.log("Error occurred while deleting the task! ", error);
+      alert("Error occurred while deleting the task!");
     }
   };
-  
 
-  // const toggleDeleteClick = () => {
-  //   dispatch(toggleDeleteIsClicked());
-  // };
-
-  const toggleCompletedClick = () => {
-    dispatch(toggleCompletedClicked());
+  const handleEdit = (taskId, taskTitle, taskDes, taskDate) => {
+    dispatch(toggleEditClickHandler());
+    const obj = {
+      _id: taskId,
+      title: taskTitle,
+      description: taskDes,
+      date: taskDate,
+      
+    }
+    
+    setIsModalOpen(true);
+    dispatch(editTodo(obj));
+    // dispatch(toggleEditClickHandler());
   };
+  
+  // const toggleCompletedClick = () => {
+  //   dispatch(toggleCompletedClicked());
+  // };
 
   const showCompletedTasks = () => {
     // Dispatch action to set CompletedClicked flag
@@ -120,8 +146,8 @@ export default function Home() {
   };
 
   // const deleteCompletedTask = (taskID) => {
-    // Implement logic to delete a completed task
-    // Dispatch action to delete the task from the store
+  // Implement logic to delete a completed task
+  // Dispatch action to delete the task from the store
   // };
 
   return (
@@ -146,12 +172,11 @@ export default function Home() {
             >
               {" "}
               <BiPlus />
+              {/* {(isModalOpen || AddClicked) &&  <AddTasks/>} */}
               {AddClicked && <AddTasks />}
             </button>
 
-            <button
-              className="bg-red-500 text-white px-4 py-2 rounded hover-bg-red-600"
-            >
+            <button className="bg-red-500 text-white px-4 py-2 rounded hover-bg-red-600">
               <BiTrash />
             </button>
           </div>
@@ -179,13 +204,31 @@ export default function Home() {
                     {new Date(task.date).toLocaleDateString("en-GB")}
                   </div>
                   <div
+                    className="bg-emerald-600 text-white text-bold px-4 py-2 rounded-lg hover:bg-emerald-400 cursor-pointer"
+                    onClick={() => handleEdit(task._id,
+                      task.title,
+                      task.description,
+                      task.date)}
+                  >
+                    <BiEdit />
+                    {isModalOpen && <AddTasks />}
+                  </div>
+                  <div
                     className="bg-purple-700 text-white text-bold px-4 py-2 rounded-lg hover:bg-purple-500 cursor-pointer"
-                    onClick={() => markTaskAsCompleted(task._id, task.title, task.description, task.date)}
+                    onClick={() =>
+                      markTaskAsCompleted(
+                        task._id,
+                        task.title,
+                        task.description,
+                        task.date
+                      )
+                    }
                   >
                     <BiCheck />
                   </div>
-                  <div className="bg-pink-700 text-white text-bold px-4 py-2 rounded-lg hover:bg-pink-500 cursor-pointer"
-                  onClick={() => handleDelete(task._id)}
+                  <div
+                    className="bg-pink-700 text-white text-bold px-4 py-2 rounded-lg hover:bg-pink-500 cursor-pointer"
+                    onClick={() => handleDelete(task._id)}
                   >
                     <BiTrash />
                   </div>
@@ -203,36 +246,34 @@ export default function Home() {
 
         {/* Add a section to display completed tasks */}
         {isCompletedClicked && (
-  <div className="p-4">
-    {completedTasks.map((task) => (
-      <div
-        key={task.id}
-        className="bg-slate-800 p-3 text-white shadow-md mb-4"
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <BiCircle className="text-purple-500" />
-            <div className="flex flex-col">
-              <div className="text-md font-semibold italic">
-                {task.title}
+          <div className="p-4">
+            {completedTasks.map((task) => (
+              <div
+                key={task.id}
+                className="bg-slate-800 p-3 text-white shadow-md mb-4"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <BiCircle className="text-purple-500" />
+                    <div className="flex flex-col">
+                      <div className="text-md font-semibold italic">
+                        {task.title}
+                      </div>
+                      <div className="text-sm text-gray-400 italic">
+                        {task.description}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="text-gray-300 text-sm text-right italic">
+                      {new Date(task.date).toLocaleDateString("en-GB")}
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="text-sm text-gray-400 italic">
-                {task.description}
-              </div>
-            </div>
+            ))}
           </div>
-          <div className="flex items-center gap-4">
-            <div className="text-gray-300 text-sm text-right italic">
-              {new Date(task.date).toLocaleDateString("en-GB")}
-            </div>
-            
-          </div>
-        </div>
-      </div>
-    ))}
-  </div>
-)}
-
+        )}
       </div>
     </div>
   );

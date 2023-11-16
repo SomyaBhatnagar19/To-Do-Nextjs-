@@ -8,21 +8,31 @@ import { todoData } from '../../library/model/toDoSchema';
 
 export async function PUT(request, content) {
     const todoId = content.params.updatedDataRoute;
-    const filter = { _id: todoId };
     const payload = await request.json();
-    await mongoose.connect(collectionStr);
+  
     try {
-        const result = await todoData.findOneAndUpdate(filter, payload, { new: true });
-        console.log("In Route.js PUT request has given this : ", result);
-        return NextResponse.json(result);
-    } catch (error) {
-        console.error("Error occurred during PUT request: ", error);
+      await mongoose.connect(collectionStr);
+      const result = await todoData.findByIdAndUpdate(todoId, payload, { new: true });
+  
+      console.log("Updated Data: ", result);
+  
+      if (!result) {
         return NextResponse.error({
-            status: 500,
-            message: 'Internal server error occurred while processing the request',
+          status: 404,
+          message: 'Task not found with the provided ID',
         });
+      }
+  
+      return NextResponse.json(result);
+    } catch (error) {
+      console.error("Error occurred during PUT request: ", error);
+      return NextResponse.error({
+        status: 500,
+        message: 'Internal server error occurred while processing the request',
+      });
     }
-}
+  }
+  
 
 export async function DELETE(request, content) {
     const todoId = content.params.updatedDataRoute;
