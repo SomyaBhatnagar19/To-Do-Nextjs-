@@ -65,13 +65,50 @@ export default function Home() {
       alert("Error!");
       console.error(error);
     }
+
+    //making delete functionality when check button clicked the particular task clicked is deleted from total tasks
+    try {
+      const response = await fetch(`http://localhost:3000/api/${taskID}`, {
+        method : "DELETE",
+        headers : {
+          "Content-Type" : "application/json"
+        }
+      })
+
+      const data = await response.json();
+      console.log("Completed data deleted from the all task list: ", data);
+
+      alert("You have deleted the task successfully.");
+    } catch(error) {
+      console.log("Error! while deleteing the task. ", error);
+      alert("Error! while deleteing the task. ");
+    }
   };
 
-
-
-  const toggleDeleteClick = () => {
-    dispatch(toggleDeleteIsClicked());
+  const handleDelete = async (taskID) => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/${taskID}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      const data = await response.json();
+      console.log(data);
+      alert("Task Deleted.");
+      // dispatch(toggleDeleteIsClicked());
+      alert('You have successfully deleted the task!');
+    } catch (error) {
+      console.log('Error occurred while deleting the task! ', error);
+      alert('Error occurred while deleting the task!');
+    }
   };
+  
+
+  // const toggleDeleteClick = () => {
+  //   dispatch(toggleDeleteIsClicked());
+  // };
 
   const toggleCompletedClick = () => {
     dispatch(toggleCompletedClicked());
@@ -82,10 +119,10 @@ export default function Home() {
     dispatch(toggleCompletedClicked());
   };
 
-  const deleteCompletedTask = (taskID) => {
+  // const deleteCompletedTask = (taskID) => {
     // Implement logic to delete a completed task
     // Dispatch action to delete the task from the store
-  };
+  // };
 
   return (
     <div className="bg-zinc-400 min-h-screen">
@@ -114,7 +151,7 @@ export default function Home() {
 
             <button
               className="bg-red-500 text-white px-4 py-2 rounded hover-bg-red-600"
-              onClick={() => toggleDeleteClick()}
+              onClick={() => handleDelete(task._id)}
             >
               <BiTrash />
             </button>
@@ -144,7 +181,7 @@ export default function Home() {
                   </div>
                   <div
                     className="bg-purple-700 text-white text-bold px-4 py-2 rounded-lg hover:bg-purple-500 cursor-pointer"
-                    onClick={() => markTaskAsCompleted(task._id, task.title, task.decsription, task.date)}
+                    onClick={() => markTaskAsCompleted(task._id, task.title, task.description, task.date)}
                   >
                     <BiCheck />
                   </div>
